@@ -10,16 +10,27 @@ export default function Home() {
   const handleTranscribe = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/public/sample.mp3"); 
+      // Fetch the audio file correctly
+      const response = await fetch("/sample.mp3");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch audio file. Check file path.");
+      }
+
       const audioBlob = await response.blob();
-  
-  
+
+      // Ensure correct MIME type
       const audioFile = new File([audioBlob], "sample.mp3", { type: "audio/mpeg" });
-  
+
+      console.log("Audio File:", audioFile);
+      console.log("Audio File Type:", audioFile.type);
+
+      // Prepare FormData
       const formData = new FormData();
       formData.append("file", audioFile);
       formData.append("model", "whisper-1");
-  
+
+      // Make API call
       const apiResponse = await axios.post(
         "https://api.openai.com/v1/audio/transcriptions",
         formData,
@@ -30,11 +41,11 @@ export default function Home() {
           },
         }
       );
-  
+
       if (apiResponse.status !== 200) {
         throw new Error("Failed to transcribe audio");
       }
-  
+
       const result = apiResponse.data;
       setTranscription(result.text);
     } catch (error) {
@@ -44,7 +55,6 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <main className="p-4 max-w-2xl mx-auto">
