@@ -9,6 +9,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const [cleanedAudioUrl, setCleanedAudioUrl] = useState(null);
+  const [translation, setTranslation] = useState("");
   const waveformRef = useRef(null);
   const wavesurferRef = useRef(null);
   const cleanedWaveformRef = useRef(null);
@@ -163,6 +164,37 @@ export default function Home() {
     }
   };
 
+  const callChatGPTForTranslation = async (text) => {
+    try {
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: `Translate the following text to English: ${text}` },
+          ],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+          },
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Failed to get translation from ChatGPT");
+      }
+
+      const translatedText = response.data.choices[0].message.content;
+      setTranslation(translatedText);
+    } catch (error) {
+      alert("Error getting translation: " + error.message);
+      console.error(error);
+    }
+  };
+
   const handleTranscribe = async () => {
     const fileInput = document.getElementById("audioFileInput");
     const files = fileInput.files;
@@ -198,7 +230,7 @@ export default function Home() {
       formData.append("file", cleanedBlob);
       formData.append("model", "whisper-1");
 
-      // Make API call
+      // Make API call for transcription
       const apiResponse = await axios.post(
         "https://api.openai.com/v1/audio/transcriptions",
         formData,
@@ -216,6 +248,9 @@ export default function Home() {
 
       const result = apiResponse.data;
       setTranscription(result.text);
+
+      // Call ChatGPT for translation
+      await callChatGPTForTranslation(result.text);
     } catch (error) {
       alert("Error transcribing audio: " + error.message);
       console.error(error);
@@ -266,6 +301,13 @@ export default function Home() {
         <div className="mt-6 p-4 bg-gray-50 rounded">
           <h2 className="text-lg font-semibold mb-2">Transcription:</h2>
           <p className="whitespace-pre-wrap">{transcription}</p>
+        </div>
+      )}
+
+      {translation && (
+        <div className="mt-6 p-4 bg-gray-50 rounded">
+          <h2 className="text-lg font-semibold mb-2">Translation:</h2>
+          <p className="whitespace-pre-wrap">{translation}</p>
         </div>
       )}
     </main>
