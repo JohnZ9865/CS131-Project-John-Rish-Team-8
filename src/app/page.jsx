@@ -164,16 +164,16 @@ export default function Home() {
   };
 
   const handleTranscribe = async () => {
+    const fileInput = document.getElementById('audioFileInput');
+    const files = fileInput.files;
+    if (!files.length) {
+      alert('Please select an audio file.');
+      return;
+    }
+    const audioBlob = files[0];
+
     setIsLoading(true);
     try {
-      // Fetch the audio file
-      const response = await fetch("/sample.mp3");
-      if (!response.ok) {
-        throw new Error("Failed to fetch audio file. Check file path.");
-      }
-
-      const audioBlob = await response.blob();
-
       // Initialize original waveform
       const originalUrl = await initializeWaveSurfer(
         audioBlob,
@@ -227,6 +227,8 @@ export default function Home() {
   return (
     <main className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Audio Transcription</h1>
+
+      <input type="file" accept="audio/*" id="audioFileInput" />
 
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Original Audio</h3>
