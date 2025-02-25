@@ -164,10 +164,10 @@ export default function Home() {
   };
 
   const handleTranscribe = async () => {
-    const fileInput = document.getElementById('audioFileInput');
+    const fileInput = document.getElementById("audioFileInput");
     const files = fileInput.files;
     if (!files.length) {
-      alert('Please select an audio file.');
+      alert("Please select an audio file.");
       return;
     }
     const audioBlob = files[0];
