@@ -172,7 +172,10 @@ export default function Home() {
           model: "gpt-3.5-turbo",
           messages: [
             { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: `Translate the following text to English: ${text}` },
+            {
+              role: "user",
+              content: `Translate the following text to English: ${text}`,
+            },
           ],
         },
         {
